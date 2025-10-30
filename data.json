@@ -1,0 +1,204 @@
+[
+  {
+    "name": "Downtown Realty",
+    "properties": [
+      {
+        "type": "House",
+        "address": "1 Main St",
+        "indoorArea": 120,
+        "propertyValue": 250000,
+        "latitude": 45.758,
+        "longitude": 21.2355,
+        "floor": null,
+        "hasElevator": null,
+        "monthlyRent": null,
+        "isRented": null,
+        "outdoorArea": 80
+      },
+      {
+        "type": "RentableApartment",
+        "address": "2 Elm St, Apt 4B",
+        "indoorArea": 60,
+        "propertyValue": 95000,
+        "latitude": 45.7602,
+        "longitude": 21.2373,
+        "floor": 2,
+        "hasElevator": true,
+        "monthlyRent": 450,
+        "isRented": false,
+        "outdoorArea": null
+      },
+      {
+        "type": "Apartment",
+        "address": "4 Pine St, Apt 7",
+        "indoorArea": 80,
+        "propertyValue": 130000,
+        "latitude": 45.759,
+        "longitude": 21.234,
+        "floor": 3,
+        "hasElevator": false,
+        "monthlyRent": null,
+        "isRented": null,
+        "outdoorArea": null
+      },
+      {
+        "type": "RentableApartment",
+        "address": "6 Oak Ave, Apt 1",
+        "indoorArea": 45,
+        "propertyValue": 70000,
+        "latitude": 45.7575,
+        "longitude": 21.2368,
+        "floor": 1,
+        "hasElevator": false,
+        "monthlyRent": 320,
+        "isRented": true,
+        "outdoorArea": null
+      },
+      {
+        "type": "Apartment",
+        "address": "asdf",
+        "indoorArea": 23,
+        "propertyValue": 23,
+        "latitude": 45.76,
+        "longitude": 21.22,
+        "floor": 6,
+        "hasElevator": true,
+        "monthlyRent": null,
+        "isRented": null,
+        "outdoorArea": null
+      }
+    ]
+  },
+  {
+    "name": "Suburb Homes",
+    "properties": [
+      {
+        "type": "House",
+        "address": "12 Meadow Lane",
+        "indoorArea": 160,
+        "propertyValue": 320000,
+        "latitude": 45.765,
+        "longitude": 21.23,
+        "floor": null,
+        "hasElevator": null,
+        "monthlyRent": null,
+        "isRented": null,
+        "outdoorArea": 150
+      },
+      {
+        "type": "House",
+        "address": "18 Cedar Court",
+        "indoorArea": 110,
+        "propertyValue": 210000,
+        "latitude": 45.764,
+        "longitude": 21.2335,
+        "floor": null,
+        "hasElevator": null,
+        "monthlyRent": null,
+        "isRented": null,
+        "outdoorArea": 60
+      },
+      {
+        "type": "Apartment",
+        "address": "21 Birch Rd, Apt 2",
+        "indoorArea": 55,
+        "propertyValue": 85000,
+        "latitude": 45.7625,
+        "longitude": 21.232,
+        "floor": 2,
+        "hasElevator": false,
+        "monthlyRent": null,
+        "isRented": null,
+        "outdoorArea": null
+      }
+    ]
+  },
+  {
+    "name": "Riverbank Estates",
+    "properties": [
+      {
+        "type": "RentableApartment",
+        "address": "3 Riverside Dr, Apt 12",
+        "indoorArea": 70,
+        "propertyValue": 140000,
+        "latitude": 45.7555,
+        "longitude": 21.24,
+        "floor": 4,
+        "hasElevator": true,
+        "monthlyRent": 520,
+        "isRented": false,
+        "outdoorArea": null
+      },
+      {
+        "type": "Apartment",
+        "address": "7 River St, Apt 5",
+        "indoorArea": 65,
+        "propertyValue": 120000,
+        "latitude": 45.756,
+        "longitude": 21.2385,
+        "floor": 3,
+        "hasElevator": true,
+        "monthlyRent": null,
+        "isRented": null,
+        "outdoorArea": null
+      },
+      {
+        "type": "House",
+        "address": "9 Waterway Blvd",
+        "indoorArea": 200,
+        "propertyValue": 480000,
+        "latitude": 45.7525,
+        "longitude": 21.242,
+        "floor": null,
+        "hasElevator": null,
+        "monthlyRent": null,
+        "isRented": null,
+        "outdoorArea": 220
+      }
+    ]
+  },
+  {
+    "name": "Campus Rentals",
+    "properties": [
+      {
+        "type": "RentableApartment",
+        "address": "10 College Ave, Apt 101",
+        "indoorArea": 35,
+        "propertyValue": 45000,
+        "latitude": 45.7598,
+        "longitude": 21.2405,
+        "floor": 1,
+        "hasElevator": false,
+        "monthlyRent": 260,
+        "isRented": true,
+        "outdoorArea": null
+      },
+      {
+        "type": "RentableApartment",
+        "address": "10 College Ave, Apt 102",
+        "indoorArea": 38,
+        "propertyValue": 47000,
+        "latitude": 45.7599,
+        "longitude": 21.2407,
+        "floor": 1,
+        "hasElevator": false,
+        "monthlyRent": 270,
+        "isRented": false,
+        "outdoorArea": null
+      },
+      {
+        "type": "Apartment",
+        "address": "14 Student Row, Apt 6",
+        "indoorArea": 42,
+        "propertyValue": 60000,
+        "latitude": 45.7589,
+        "longitude": 21.2415,
+        "floor": 2,
+        "hasElevator": false,
+        "monthlyRent": null,
+        "isRented": null,
+        "outdoorArea": null
+      }
+    ]
+  }
+]
