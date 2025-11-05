@@ -25,7 +25,7 @@
         "floor": 2,
         "hasElevator": true,
         "monthlyRent": 450,
-        "isRented": false,
+        "isRented": true,
         "outdoorArea": null
       },
       {
@@ -56,15 +56,28 @@
       },
       {
         "type": "Apartment",
-        "address": "asdf",
-        "indoorArea": 23,
-        "propertyValue": 23,
-        "latitude": 45.76,
-        "longitude": 21.22,
-        "floor": 6,
-        "hasElevator": true,
+        "address": "Close Pair St, Apt A",
+        "indoorArea": 55,
+        "propertyValue": 90000,
+        "latitude": 45.759,
+        "longitude": 21.234,
+        "floor": 2,
+        "hasElevator": false,
         "monthlyRent": null,
         "isRented": null,
+        "outdoorArea": null
+      },
+      {
+        "type": "RentableApartment",
+        "address": "Close Pair St, Apt B",
+        "indoorArea": 50,
+        "propertyValue": 88000,
+        "latitude": 45.75905,
+        "longitude": 21.23405,
+        "floor": 2,
+        "hasElevator": false,
+        "monthlyRent": 300,
+        "isRented": false,
         "outdoorArea": null
       }
     ]
@@ -183,7 +196,7 @@
         "floor": 1,
         "hasElevator": false,
         "monthlyRent": 270,
-        "isRented": false,
+        "isRented": true,
         "outdoorArea": null
       },
       {

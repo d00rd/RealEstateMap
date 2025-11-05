@@ -24,7 +24,8 @@ namespace RealEstateMap
 
         private List<RealEstateAgency> agencies = new List<RealEstateAgency>();
 
-        private readonly Dictionary<Rectangle, Property> markerHitboxes = new Dictionary<Rectangle, Property>();
+        // Marker hit testing -> now allow multiple properties per rectangle
+        private readonly Dictionary<Rectangle, List<Property>> markerHitboxes = new Dictionary<Rectangle, List<Property>>();
 
         public Form1()
         {
@@ -312,6 +313,7 @@ namespace RealEstateMap
             double centerLon = centerXNorm * 360.0 - 180.0;
             double centerLat = InverseMercatorLat(centerYNorm);
 
+            // Pass the full agency properties as markers to draw
             await LoadMap(centerLat, centerLon, chosenZoom, properties);
         }
 
@@ -322,6 +324,7 @@ namespace RealEstateMap
             return latRad * 180.0 / Math.PI;
         }
 
+        // --- rest of existing mapping code updated to accept explicit markers ---
         private async Task LoadMap(double latitude, double longitude, int zoom = 15, IEnumerable<Property>? markers = null)
         {
             try
@@ -358,6 +361,7 @@ namespace RealEstateMap
             int zoom, int width, int height, IEnumerable<Property>? markers = null)
         {
 
+            // Clear existing hitboxes
             markerHitboxes.Clear();
 
             Bitmap mapImage = new Bitmap(width, height);
@@ -432,11 +436,21 @@ namespace RealEstateMap
                     if (hitRect.Right < 0 || hitRect.Left > width || hitRect.Bottom < 0 || hitRect.Top > height)
                         continue;
 
-                    DrawPropertyMarker(g, imgX, imgY);
+                    DrawPropertyMarker(g, imgX, imgY, prop);
 
                     var clamped = Rectangle.Intersect(new Rectangle(0, 0, width, height), hitRect);
                     if (!clamped.IsEmpty)
-                        markerHitboxes[clamped] = prop;
+                    {
+                        if (!markerHitboxes.TryGetValue(clamped, out var list))
+                        {
+                            list = new List<Property>();
+                            markerHitboxes[clamped] = list;
+                        }
+
+                        // avoid duplicates
+                        if (!list.Contains(prop))
+                            list.Add(prop);
+                    }
                 }
             }
 
@@ -459,59 +473,112 @@ namespace RealEstateMap
         }
 
 
-        private void DrawPropertyMarker(Graphics g, int x, int y)
+        private void DrawPropertyMarker(Graphics g, int x, int y, Property prop)
         {
             int r = 8;
+
+            // shadow
             using (Brush shadow = new SolidBrush(Color.FromArgb(100, 0, 0, 0)))
             {
                 g.FillEllipse(shadow, x - r + 2, y - r + 2, r * 2, r * 2);
             }
-            using (Brush red = new SolidBrush(Color.Red))
-            using (Pen border = new Pen(Color.DarkRed, 2))
+
+            // Choose color based on rentability / availability
+            Color fillColor;
+            Color borderColor;
+
+            if (prop is IRentable rentable)
             {
-                g.FillEllipse(red, x - r, y - r, r * 2, r * 2);
+                if (rentable.IsRented)
+                {
+                    // unavailable / rented
+                    fillColor = Color.Gray;
+                    borderColor = Color.DarkSlateGray;
+                }
+                else
+                {
+                    // available to rent
+                    fillColor = Color.LimeGreen;
+                    borderColor = Color.DarkGreen;
+                }
+            }
+            else
+            {
+                // not for rent
+                fillColor = Color.DodgerBlue;
+                borderColor = Color.Navy;
+            }
+
+            using (Brush fill = new SolidBrush(fillColor))
+            using (Pen border = new Pen(borderColor, 2))
+            {
+                g.FillEllipse(fill, x - r, y - r, r * 2, r * 2);
                 g.DrawEllipse(border, x - r, y - r, r * 2, r * 2);
             }
         }
 
-        private void PictureBoxMap_MouseClick(object? sender, MouseEventArgs e)
+        private async void PictureBoxMap_MouseClick(object? sender, MouseEventArgs e)
         {
             if (pictureBoxMap.Image == null) return;
 
             Point click = e.Location;
 
-            Rectangle? bestRect = null;
+            // collect all properties whose hit-rect contains the click
+            var directMatches = new List<Property>();
             foreach (var kvp in markerHitboxes)
             {
                 if (kvp.Key.Contains(click))
                 {
-                    if (bestRect == null || kvp.Key.Width * kvp.Key.Height < bestRect.Value.Width * bestRect.Value.Height)
-                        bestRect = kvp.Key;
+                    directMatches.AddRange(kvp.Value);
                 }
             }
 
-            if (bestRect.HasValue)
+            var uniqueMatches = directMatches.Distinct().ToList();
+
+            if (uniqueMatches.Count == 1)
             {
-                var prop = markerHitboxes[bestRect.Value];
-                ShowPropertyInfo(prop);
+                await ShowPropertyInfo(uniqueMatches[0]);
+                return;
+            }
+            else if (uniqueMatches.Count > 1)
+            {
+                // multiple properties exactly at (or overlapping) the clicked rect -> show chooser
+                using var chooser = new PropertyChooserForm(uniqueMatches);
+                if (chooser.ShowDialog(this) == DialogResult.OK && chooser.SelectedProperty != null)
+                {
+                    await ShowPropertyInfo(chooser.SelectedProperty);
+                }
                 return;
             }
 
+            // If no direct match, choose nearest marker within a tolerance (e.g., 12 px)
             const int tolerance = 12;
-            (double dist, Property? prop) best = (double.MaxValue, null);
+            var candidates = new List<(double dist, Property prop)>();
             foreach (var kvp in markerHitboxes)
             {
                 var center = new Point(kvp.Key.Left + kvp.Key.Width / 2, kvp.Key.Top + kvp.Key.Height / 2);
                 double d = Distance(center, click);
-                if (d < best.dist)
-                {
-                    best = (d, kvp.Value);
-                }
+                foreach (var prop in kvp.Value)
+                    candidates.Add((d, prop));
             }
 
-            if (best.prop != null && best.dist <= tolerance)
+            var nearest = candidates.OrderBy(c => c.dist).ToList();
+            if (nearest.Count == 0) return;
+
+            double bestDist = nearest[0].dist;
+            var nearList = nearest.Where(c => Math.Abs(c.dist - bestDist) < 1e-6 || c.dist <= tolerance).Select(c => c.prop).Distinct().ToList();
+
+            if (nearList.Count == 1)
             {
-                ShowPropertyInfo(best.prop);
+                await ShowPropertyInfo(nearList[0]);
+            }
+            else if (nearList.Count > 1)
+            {
+                using var chooser = new PropertyChooserForm(nearList);
+                if (chooser.ShowDialog(this) == DialogResult.OK && chooser.SelectedProperty != null)
+                {
+                    await ShowPropertyInfo(chooser.SelectedProperty);
+                }
             }
         }
 
@@ -522,11 +589,60 @@ namespace RealEstateMap
             return Math.Sqrt(dx * dx + dy * dy);
         }
 
-        private void ShowPropertyInfo(Property prop)
+        // Async: show info and optionally rent the property
+        private async Task ShowPropertyInfo(Property prop)
         {
+            if (prop == null) return;
+
             string text = prop.ToString() + Environment.NewLine
                           + $"Lat: {prop.Latitude}, Lon: {prop.Longitude}";
-            MessageBox.Show(text, "Property Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            if (prop is IRentable rentable)
+            {
+                if (rentable.IsRented)
+                {
+                    MessageBox.Show(text + Environment.NewLine + "Status: Rented", "Property Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    var result = MessageBox.Show(text + Environment.NewLine + "Status: Available for rent" + Environment.NewLine + "Do you want to rent this property?", "Property Info", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result == DialogResult.Yes)
+                    {
+                        rentable.IsRented = true;
+
+                        // persist change (best-effort)
+                        try
+                        {
+                            await PersistenceService.SaveAsync(agencies);
+                        }
+                        catch
+                        {
+                            // ignore saving errors for now
+                        }
+
+                        // update UI list
+                        RefreshProperties();
+
+                        // Show the full agency view (all markers) after renting instead of the single-property view
+                        var props = GetSelectedAgencyProperties().ToList();
+                        if (props.Any())
+                        {
+                            ShowAgencyOnMap(props);
+                        }
+                        else
+                        {
+                            // fallback: center on the rented property
+                            _ = ShowSinglePropertyOnMap(prop);
+                        }
+
+                        MessageBox.Show("Property has been marked as rented.", "Rented", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show(text + Environment.NewLine + "Not for rent.", "Property Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
     }
 }
