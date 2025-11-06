@@ -6,7 +6,6 @@ using System.Windows.Forms;
 
 namespace RealEstateMap
 {
-    // Simple modal dialog to pick one property from a short list
     public class PropertyChooserForm : Form
     {
         private readonly ListBox listBox;
@@ -28,7 +27,6 @@ namespace RealEstateMap
                 DisplayMember = "Address"
             };
 
-            // Add properties (keep original objects)
             listBox.Items.AddRange(properties is Property[] arr ? arr : new List<Property>(properties).ToArray());
             listBox.DoubleClick += ListBox_DoubleClick;
             Controls.Add(listBox);

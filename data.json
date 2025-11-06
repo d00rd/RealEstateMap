@@ -77,7 +77,20 @@
         "floor": 2,
         "hasElevator": false,
         "monthlyRent": 300,
-        "isRented": false,
+        "isRented": true,
+        "outdoorArea": null
+      },
+      {
+        "type": "Apartment",
+        "address": "asdf",
+        "indoorArea": 78,
+        "propertyValue": 78,
+        "latitude": 45.75922759313494,
+        "longitude": 21.236186645507814,
+        "floor": 8,
+        "hasElevator": true,
+        "monthlyRent": null,
+        "isRented": null,
         "outdoorArea": null
       }
     ]
@@ -139,7 +152,7 @@
         "floor": 4,
         "hasElevator": true,
         "monthlyRent": 520,
-        "isRented": false,
+        "isRented": true,
         "outdoorArea": null
       },
       {

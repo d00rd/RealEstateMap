@@ -1,4 +1,3 @@
-
 using System;
 using System.Drawing;
 using System.Globalization;
@@ -31,7 +30,7 @@ namespace RealEstateMap
         public double SelectedLatitude => selectedLat ?? 0;
         public double SelectedLongitude => selectedLon ?? 0;
 
-        public MapPickerForm(double initialLat = 45.7580, double initialLon = 21.2355, int initialZoom = 15, int width = 600, int height = 400)
+        public MapPickerForm(double initialLat = 45.7580, double initialLon = 21.2355, int initialZoom = 13, int width = 600, int height = 400)
         {
             Text = "Choose location on map";
             StartPosition = FormStartPosition.CenterParent;
@@ -76,7 +75,6 @@ namespace RealEstateMap
 
         private async Task GenerateMapAsync(double latitude, double longitude, int z)
         {
-            // Dispose previous
             mapImage?.Dispose();
             mapImage = new Bitmap(mapWidth, mapHeight);
 
@@ -136,7 +134,7 @@ namespace RealEstateMap
 
             pbMap.Image = (Bitmap)mapImage.Clone();
 
-            // reset selection
+
             selectedLat = null;
             selectedLon = null;
             lblCoords.Text = $"Center: {latitude.ToString(CultureInfo.InvariantCulture)}, {longitude.ToString(CultureInfo.InvariantCulture)}";

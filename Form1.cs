@@ -24,7 +24,6 @@ namespace RealEstateMap
 
         private List<RealEstateAgency> agencies = new List<RealEstateAgency>();
 
-        // Marker hit testing -> now allow multiple properties per rectangle
         private readonly Dictionary<Rectangle, List<Property>> markerHitboxes = new Dictionary<Rectangle, List<Property>>();
 
         public Form1()
@@ -49,7 +48,7 @@ namespace RealEstateMap
                 }
                 catch
                 {
-                    // ignore or log
+                    // ignore 
                 }
             };
 
@@ -61,7 +60,7 @@ namespace RealEstateMap
             this.Size = new Size(900, 600);
             this.StartPosition = FormStartPosition.CenterScreen;
 
-            // Left panel: agencies + properties
+
             var pnl = new Panel
             {
                 Location = new Point(10, 10),
@@ -313,7 +312,6 @@ namespace RealEstateMap
             double centerLon = centerXNorm * 360.0 - 180.0;
             double centerLat = InverseMercatorLat(centerYNorm);
 
-            // Pass the full agency properties as markers to draw
             await LoadMap(centerLat, centerLon, chosenZoom, properties);
         }
 
@@ -324,7 +322,6 @@ namespace RealEstateMap
             return latRad * 180.0 / Math.PI;
         }
 
-        // --- rest of existing mapping code updated to accept explicit markers ---
         private async Task LoadMap(double latitude, double longitude, int zoom = 15, IEnumerable<Property>? markers = null)
         {
             try
@@ -361,7 +358,6 @@ namespace RealEstateMap
             int zoom, int width, int height, IEnumerable<Property>? markers = null)
         {
 
-            // Clear existing hitboxes
             markerHitboxes.Clear();
 
             Bitmap mapImage = new Bitmap(width, height);
@@ -420,10 +416,9 @@ namespace RealEstateMap
                     }
                 }
 
-                // Determine markers to draw: explicit markers parameter or selected-agency properties
                 var markersToDraw = (markers != null) ? markers.ToList() : GetSelectedAgencyProperties().ToList();
 
-                // Draw markers
+ 
                 foreach (var prop in markersToDraw)
                 {
                     var (propPx, propPy) = LatLonToWorldPixels(prop.Latitude, prop.Longitude, zoom);
@@ -465,7 +460,6 @@ namespace RealEstateMap
             double x = (lon + 180.0) / 360.0 * mapSize;
 
             double sinLat = Math.Sin(lat * Math.PI / 180.0);
-            // clamp for numerical stability
             sinLat = Math.Min(Math.Max(sinLat, -0.9999), 0.9999);
             double y = (0.5 - Math.Log((1 + sinLat) / (1 - sinLat)) / (4 * Math.PI)) * mapSize;
 
@@ -477,13 +471,11 @@ namespace RealEstateMap
         {
             int r = 8;
 
-            // shadow
             using (Brush shadow = new SolidBrush(Color.FromArgb(100, 0, 0, 0)))
             {
                 g.FillEllipse(shadow, x - r + 2, y - r + 2, r * 2, r * 2);
             }
 
-            // Choose color based on rentability / availability
             Color fillColor;
             Color borderColor;
 
@@ -542,7 +534,6 @@ namespace RealEstateMap
             }
             else if (uniqueMatches.Count > 1)
             {
-                // multiple properties exactly at (or overlapping) the clicked rect -> show chooser
                 using var chooser = new PropertyChooserForm(uniqueMatches);
                 if (chooser.ShowDialog(this) == DialogResult.OK && chooser.SelectedProperty != null)
                 {
@@ -551,35 +542,6 @@ namespace RealEstateMap
                 return;
             }
 
-            // If no direct match, choose nearest marker within a tolerance (e.g., 12 px)
-            const int tolerance = 12;
-            var candidates = new List<(double dist, Property prop)>();
-            foreach (var kvp in markerHitboxes)
-            {
-                var center = new Point(kvp.Key.Left + kvp.Key.Width / 2, kvp.Key.Top + kvp.Key.Height / 2);
-                double d = Distance(center, click);
-                foreach (var prop in kvp.Value)
-                    candidates.Add((d, prop));
-            }
-
-            var nearest = candidates.OrderBy(c => c.dist).ToList();
-            if (nearest.Count == 0) return;
-
-            double bestDist = nearest[0].dist;
-            var nearList = nearest.Where(c => Math.Abs(c.dist - bestDist) < 1e-6 || c.dist <= tolerance).Select(c => c.prop).Distinct().ToList();
-
-            if (nearList.Count == 1)
-            {
-                await ShowPropertyInfo(nearList[0]);
-            }
-            else if (nearList.Count > 1)
-            {
-                using var chooser = new PropertyChooserForm(nearList);
-                if (chooser.ShowDialog(this) == DialogResult.OK && chooser.SelectedProperty != null)
-                {
-                    await ShowPropertyInfo(chooser.SelectedProperty);
-                }
-            }
         }
 
         private static double Distance(Point a, Point b)
@@ -589,7 +551,6 @@ namespace RealEstateMap
             return Math.Sqrt(dx * dx + dy * dy);
         }
 
-        // Async: show info and optionally rent the property
         private async Task ShowPropertyInfo(Property prop)
         {
             if (prop == null) return;
@@ -610,7 +571,7 @@ namespace RealEstateMap
                     {
                         rentable.IsRented = true;
 
-                        // persist change (best-effort)
+  
                         try
                         {
                             await PersistenceService.SaveAsync(agencies);
@@ -620,10 +581,9 @@ namespace RealEstateMap
                             // ignore saving errors for now
                         }
 
-                        // update UI list
+
                         RefreshProperties();
 
-                        // Show the full agency view (all markers) after renting instead of the single-property view
                         var props = GetSelectedAgencyProperties().ToList();
                         if (props.Any())
                         {
